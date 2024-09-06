@@ -1,8 +1,27 @@
 import { InputTextSender } from './components/InputTextSender';
-import { useState } from 'react';
+import { useReducer } from 'react';
 import { TaskList } from './components/taskList/TaskList';
+// should be injected:
+import { getUniqueId } from './utils/uniqueIdProvider';
+// ------------------
+import {
+    taskListReducer,
+    removeTaskListAC,
+    setFilterAC,
+    updateTaskListTitleAC,
+} from './model/taskListReducer';
+import { addTaskListAC } from './model/taskListReducer';
+import {
+    tasksReducer,
+    addNewTasksAC,
+    removeTasksAC,
+    addTaskAC,
+    removeTaskAC,
+    changeTaskStatusAC,
+    updateTaskTextAC,
+} from './model/tasksReducer';
 
-type TaskListType = {
+export type TaskListType = {
     id: string;
     title: string;
     filter: FilterType;
@@ -14,49 +33,48 @@ export type TaskType = {
     isDone: boolean;
 };
 
-type TasksType = {
+export type TasksType = {
     [key: string]: Array<TaskType>;
 };
 
 export type FilterType = 'all' | 'completed' | 'active';
 
-function TaskApp() {
-    const [taskLists, setTaskLists] = useState<Array<TaskListType>>(() => [
-        { id: '1', title: 'first', filter: 'all' },
-        { id: '2', title: 'second', filter: 'active' },
-    ]);
+const taskList1Id = getUniqueId();
+const taskList2Id = getUniqueId();
 
-    const [tasks, setTasks] = useState<TasksType>(() => ({
-        1: [
-            { id: 1, text: 'first task', isDone: false },
-            { id: 2, text: 'second task', isDone: true },
-        ],
-        2: [
-            { id: 1, text: 'third task', isDone: true },
-            { id: 2, text: 'forth task', isDone: false },
-        ],
-    }));
+const initialTaskLists: Array<TaskListType> = [
+    { id: taskList1Id, title: 'first', filter: 'all' },
+    { id: taskList2Id, title: 'second', filter: 'active' },
+];
+
+const initialTasks: TasksType = {
+    [taskList1Id]: [
+        { id: 1, text: 'first task', isDone: false },
+        { id: 2, text: 'second task', isDone: true },
+    ],
+    [taskList2Id]: [
+        { id: 1, text: 'third task', isDone: true },
+        { id: 2, text: 'forth task', isDone: false },
+    ],
+};
+
+function TaskApp() {
+    const [taskLists, taskListDispatch] = useReducer(
+        taskListReducer,
+        initialTaskLists,
+    );
+
+    const [tasks, tasksDispatch] = useReducer(tasksReducer, initialTasks);
 
     const addTaskList = (title: string): void => {
-        const id = '3';
-        const newTaskList: TaskListType = {
-            id,
-            title,
-            filter: 'all',
-        };
-        setTaskLists([newTaskList, ...taskLists]);
-        setTasks({
-            ...tasks,
-            [id]: [],
-        });
+        const id = getUniqueId();
+        taskListDispatch(addTaskListAC(id, title));
+        tasksDispatch(addNewTasksAC(id));
     };
 
     const removeTaskList = (taskListId: string) => {
-        setTaskLists(taskLists.filter((tl) => tl.id !== taskListId));
-        delete tasks[taskListId];
-        setTasks({
-            ...tasks,
-        });
+        taskListDispatch(removeTaskListAC(taskListId));
+        tasksDispatch(removeTasksAC(taskListId));
     };
 
     const filterTasks = (
@@ -67,92 +85,42 @@ function TaskApp() {
             return tasks.filter(
                 (t) =>
                     (t.isDone && filter === 'completed') ||
-                    (!t.isDone && filter === 'active') ||
-                    false,
+                    (!t.isDone && filter === 'active'),
             );
         }
         return tasks;
     };
 
     const setFilterValue = (taskListId: string, filterValue: FilterType) => {
-        setTaskLists(
-            taskLists.map((tl) =>
-                tl.id === taskListId ?
-                    {
-                        ...tl,
-                        filter: filterValue,
-                    }
-                :   tl,
-            ),
-        );
+        taskListDispatch(setFilterAC(taskListId, filterValue));
     };
 
     const addTaskWrapper = (taskListId: string) => {
         return (taskTitle: string) => {
-            const newTask: TaskType = {
-                id: 3,
-                text: taskTitle,
-                isDone: false,
-            };
-            setTasks({
-                ...tasks,
-                [taskListId]: [newTask, ...tasks[taskListId]],
-            });
+            tasksDispatch(addTaskAC(taskListId, taskTitle));
         };
     };
 
     const removeTaskWrapper = (taskListId: string) => {
         return (taskId: number) => {
-            setTasks({
-                ...tasks,
-                [taskListId]: tasks[taskListId].filter((t) => t.id !== taskId),
-            });
+            tasksDispatch(removeTaskAC(taskListId, taskId));
         };
     };
 
     const changeTaskStatusWrapper = (taskListId: string) => {
         return (taskId: number, newStatus: boolean) => {
-            setTasks({
-                ...tasks,
-                [taskListId]: tasks[taskListId].map((t) =>
-                    t.id === taskId ?
-                        {
-                            ...t,
-                            isDone: newStatus,
-                        }
-                    :   t,
-                ),
-            });
+            tasksDispatch(changeTaskStatusAC(taskListId, taskId, newStatus));
         };
     };
 
     const updateTaskListTitleWrapper = (taskListId: string) => {
         return (newTitle: string) =>
-            setTaskLists(
-                taskLists.map((tl) =>
-                    tl.id === taskListId ?
-                        {
-                            ...tl,
-                            title: newTitle,
-                        }
-                    :   tl,
-                ),
-            );
+            taskListDispatch(updateTaskListTitleAC(taskListId, newTitle));
     };
 
     const updateTaskTextWrapper = (taskListId: string) => {
         return (taskId: number, newText: string) => {
-            setTasks({
-                ...tasks,
-                [taskListId]: tasks[taskListId].map((t) =>
-                    t.id === taskId ?
-                        {
-                            ...t,
-                            text: newText,
-                        }
-                    :   t,
-                ),
-            });
+            tasksDispatch(updateTaskTextAC(taskListId, taskId, newText));
         };
     };
 
