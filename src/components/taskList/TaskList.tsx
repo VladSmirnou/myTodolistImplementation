@@ -2,20 +2,34 @@ import { Button } from '../SuperButton';
 import { InputTextSender } from '../InputTextSender';
 import { Task } from './task/Task';
 import { EditableSpan } from '../EditableSpan';
-import { TaskType } from '@/App';
+import s from './taskList.module.css';
+
+export const ALL_BUTTON_NAME = 'All';
+export const ACTIVE_BUTTON_NAME = 'Active';
+export const COMPLETED_BUTTON_NAME = 'Completed';
+
+export type ButtonNameType =
+    | typeof ALL_BUTTON_NAME
+    | typeof ACTIVE_BUTTON_NAME
+    | typeof COMPLETED_BUTTON_NAME;
+
+export type TaskType = {
+    id: number;
+    text: string;
+    isDone: boolean;
+};
 
 type TaskListPropsType = {
     title: string;
     removeTaskList: () => void;
     filteredTasks: Array<TaskType>;
-    setFilterAll: () => void;
-    setFilterActive: () => void;
-    setFilterCompleted: () => void;
     addTask: (taskTitle: string) => void;
     removeTask: (taskId: number) => void;
     changeTaskStatus: (taskId: number, newStatus: boolean) => void;
     updateTaskListTitle: (newTitle: string) => void;
     updateTaskText: (taskId: number, newText: string) => void;
+    getButtonIsActive: (buttonName: ButtonNameType) => boolean;
+    setFilterValue: (buttonName: ButtonNameType) => void;
 };
 
 export const TaskList = (props: TaskListPropsType) => {
@@ -29,6 +43,10 @@ export const TaskList = (props: TaskListPropsType) => {
         return (newText: string) => {
             props.updateTaskText(taskId, newText);
         };
+    };
+
+    const setFilterValueWrapper = (buttonName: ButtonNameType) => {
+        return () => props.setFilterValue(buttonName);
     };
 
     const tasksOrNoTasksText =
@@ -59,9 +77,32 @@ export const TaskList = (props: TaskListPropsType) => {
             </div>
             <InputTextSender callBack={props.addTask} />
             {tasksOrNoTasksText}
-            <Button onClick={props.setFilterAll}>All</Button>
-            <Button onClick={props.setFilterActive}>Active</Button>
-            <Button onClick={props.setFilterCompleted}>Completed</Button>
+            <Button
+                className={
+                    props.getButtonIsActive(ALL_BUTTON_NAME) ? s.active : ''
+                }
+                onClick={setFilterValueWrapper(ALL_BUTTON_NAME)}
+            >
+                {ALL_BUTTON_NAME}
+            </Button>
+            <Button
+                className={
+                    props.getButtonIsActive(ACTIVE_BUTTON_NAME) ? s.active : ''
+                }
+                onClick={setFilterValueWrapper(ACTIVE_BUTTON_NAME)}
+            >
+                {ACTIVE_BUTTON_NAME}
+            </Button>
+            <Button
+                className={
+                    props.getButtonIsActive(COMPLETED_BUTTON_NAME) ?
+                        s.active
+                    :   ''
+                }
+                onClick={setFilterValueWrapper(COMPLETED_BUTTON_NAME)}
+            >
+                {COMPLETED_BUTTON_NAME}
+            </Button>
         </div>
     );
 };

@@ -1,6 +1,6 @@
 import { TasksType } from '@/App';
 import { taskItemGetter } from '@/utils/taskItemGetter';
-import { TaskType } from '@/App';
+import { TaskType } from '@/components/taskList/TaskList';
 
 const lastAddedTask = taskItemGetter(0);
 
@@ -77,7 +77,6 @@ export const tasksReducer = (
         }
         case 'add_task': {
             const { taskListId, taskTitle } = action.payload;
-
             const lastTaskId = lastAddedTask(state[taskListId])?.id ?? 0;
             const newTaskId = lastTaskId + 1;
 

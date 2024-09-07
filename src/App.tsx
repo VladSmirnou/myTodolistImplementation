@@ -1,6 +1,13 @@
-import { InputTextSender } from './components/InputTextSender';
 import { useReducer } from 'react';
-import { TaskList } from './components/taskList/TaskList';
+import { InputTextSender } from './components/InputTextSender';
+import {
+    TaskList,
+    TaskType,
+    ButtonNameType,
+    ALL_BUTTON_NAME,
+    ACTIVE_BUTTON_NAME,
+    COMPLETED_BUTTON_NAME,
+} from './components/taskList/TaskList';
 // should be injected:
 import { getUniqueId } from './utils/uniqueIdProvider';
 // ------------------
@@ -9,8 +16,8 @@ import {
     removeTaskListAC,
     setFilterAC,
     updateTaskListTitleAC,
+    addTaskListAC,
 } from './model/taskListReducer';
-import { addTaskListAC } from './model/taskListReducer';
 import {
     tasksReducer,
     addNewTasksAC,
@@ -27,34 +34,35 @@ export type TaskListType = {
     filter: FilterType;
 };
 
-export type TaskType = {
-    id: number;
-    text: string;
-    isDone: boolean;
-};
-
 export type TasksType = {
     [key: string]: Array<TaskType>;
 };
 
-export type FilterType = 'all' | 'completed' | 'active';
+const All_FILTER_VALUE = 'all';
+const COMPLETED_FILTER_VALUE = 'completed';
+const ACTIVE_FILTER_VALUE = 'active';
+
+export type FilterType =
+    | typeof All_FILTER_VALUE
+    | typeof COMPLETED_FILTER_VALUE
+    | typeof ACTIVE_FILTER_VALUE;
 
 const taskList1Id = getUniqueId();
 const taskList2Id = getUniqueId();
 
 const initialTaskLists: Array<TaskListType> = [
-    { id: taskList1Id, title: 'first', filter: 'all' },
-    { id: taskList2Id, title: 'second', filter: 'active' },
+    { id: taskList1Id, title: 'first', filter: All_FILTER_VALUE },
+    { id: taskList2Id, title: 'second', filter: ACTIVE_FILTER_VALUE },
 ];
 
 const initialTasks: TasksType = {
     [taskList1Id]: [
-        { id: 1, text: 'first task', isDone: false },
         { id: 2, text: 'second task', isDone: true },
+        { id: 1, text: 'first task', isDone: false },
     ],
     [taskList2Id]: [
-        { id: 1, text: 'third task', isDone: true },
         { id: 2, text: 'forth task', isDone: false },
+        { id: 1, text: 'third task', isDone: true },
     ],
 };
 
@@ -81,11 +89,11 @@ function TaskApp() {
         tasks: Array<TaskType>,
         filter: FilterType,
     ): Array<TaskType> => {
-        if (filter !== 'all') {
+        if (filter !== All_FILTER_VALUE) {
             return tasks.filter(
                 (t) =>
-                    (t.isDone && filter === 'completed') ||
-                    (!t.isDone && filter === 'active'),
+                    (t.isDone && filter === COMPLETED_FILTER_VALUE) ||
+                    (!t.isDone && filter === ACTIVE_FILTER_VALUE),
             );
         }
         return tasks;
@@ -124,24 +132,52 @@ function TaskApp() {
         };
     };
 
+    const getButtonIsActiveWrapper = (currentFilterValue: FilterType) => {
+        return (buttonName: ButtonNameType): boolean => {
+            return (
+                (currentFilterValue === All_FILTER_VALUE &&
+                    buttonName === ALL_BUTTON_NAME) ||
+                (currentFilterValue === ACTIVE_FILTER_VALUE &&
+                    buttonName === ACTIVE_BUTTON_NAME) ||
+                (currentFilterValue === COMPLETED_FILTER_VALUE &&
+                    buttonName === COMPLETED_BUTTON_NAME)
+            );
+        };
+    };
+
+    const setFilterValueWrapper = (taskListId: string) => {
+        return (buttonName: ButtonNameType): void => {
+            switch (buttonName) {
+                case ACTIVE_BUTTON_NAME: {
+                    setFilterValue(taskListId, ACTIVE_FILTER_VALUE);
+                    return;
+                }
+                case COMPLETED_BUTTON_NAME: {
+                    setFilterValue(taskListId, COMPLETED_FILTER_VALUE);
+                    return;
+                }
+                default:
+                    setFilterValue(taskListId, All_FILTER_VALUE);
+                    return;
+            }
+        };
+    };
+
     const jsxTaskLists = taskLists.map((tl) => {
-        const taskListId: string = tl.id;
+        const { id: taskListId, filter } = tl;
         return (
             <TaskList
                 key={taskListId}
                 title={tl.title}
-                filteredTasks={filterTasks(tasks[taskListId], tl.filter)}
+                filteredTasks={filterTasks(tasks[taskListId], filter)}
                 removeTaskList={() => removeTaskList(taskListId)}
-                setFilterAll={() => setFilterValue(taskListId, 'all')}
-                setFilterActive={() => setFilterValue(taskListId, 'active')}
-                setFilterCompleted={() =>
-                    setFilterValue(taskListId, 'completed')
-                }
                 addTask={addTaskWrapper(taskListId)}
                 removeTask={removeTaskWrapper(taskListId)}
                 changeTaskStatus={changeTaskStatusWrapper(taskListId)}
                 updateTaskListTitle={updateTaskListTitleWrapper(taskListId)}
                 updateTaskText={updateTaskTextWrapper(taskListId)}
+                getButtonIsActive={getButtonIsActiveWrapper(filter)}
+                setFilterValue={setFilterValueWrapper(taskListId)}
             />
         );
     });
