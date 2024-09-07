@@ -66,6 +66,16 @@ const initialTasks: TasksType = {
     ],
 };
 
+type StratType = {
+    [K in FilterType]: (tasks: Array<TaskType>) => Array<TaskType>;
+};
+
+const strats: StratType = {
+    active: (tasks: Array<TaskType>) => tasks.filter((t) => !t.isDone),
+    completed: (tasks: Array<TaskType>) => tasks.filter((t) => t.isDone),
+    all: (tasks: Array<TaskType>) => tasks,
+};
+
 function TaskApp() {
     const [taskLists, taskListDispatch] = useReducer(
         taskListReducer,
@@ -89,14 +99,8 @@ function TaskApp() {
         tasks: Array<TaskType>,
         filter: FilterType,
     ): Array<TaskType> => {
-        if (filter !== All_FILTER_VALUE) {
-            return tasks.filter(
-                (t) =>
-                    (t.isDone && filter === COMPLETED_FILTER_VALUE) ||
-                    (!t.isDone && filter === ACTIVE_FILTER_VALUE),
-            );
-        }
-        return tasks;
+        const strat = strats[filter];
+        return strat(tasks);
     };
 
     const setFilterValue = (taskListId: string, filterValue: FilterType) => {
