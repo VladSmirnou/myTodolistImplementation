@@ -49,6 +49,10 @@ export const TaskList = (props: TaskListPropsType) => {
         return () => props.setFilterValue(buttonName);
     };
 
+    const removeTaskWrapper = (taskId: number) => {
+        return () => props.removeTask(taskId);
+    };
+
     const tasksOrNoTasksText =
         props.filteredTasks.length ?
             <ul>
@@ -57,7 +61,7 @@ export const TaskList = (props: TaskListPropsType) => {
                         key={t.id}
                         isDone={t.isDone}
                         text={t.text}
-                        removeTask={() => props.removeTask(t.id)}
+                        removeTask={removeTaskWrapper(t.id)}
                         changeTaskStatus={changeTaskStatusWrapper(t.id)}
                         updateTaskText={updateTaskTextWrapper(t.id)}
                     />

@@ -1,4 +1,4 @@
-import { useReducer } from 'react';
+import { useMemo, useReducer } from 'react';
 import { InputTextSender } from './components/InputTextSender';
 import {
     TaskList,
@@ -66,14 +66,32 @@ const initialTasks: TasksType = {
     ],
 };
 
-type StratType = {
-    [K in FilterType]: (tasks: Array<TaskType>) => Array<TaskType>;
+type FilteringStratType = {
+    [K in Exclude<FilterType, typeof All_FILTER_VALUE>]: (
+        tasks: Array<TaskType>,
+    ) => Array<TaskType>;
 };
 
-const strats: StratType = {
+const filteringStrats: FilteringStratType = {
     active: (tasks: Array<TaskType>) => tasks.filter((t) => !t.isDone),
     completed: (tasks: Array<TaskType>) => tasks.filter((t) => t.isDone),
-    all: (tasks: Array<TaskType>) => tasks,
+};
+
+type SetFilterValuesStratType = {
+    [K in ButtonNameType]: (taskListId: string) => void;
+};
+
+const setFilterValuesStrats = (
+    setFilterValue: (taskListId: string, filterValue: FilterType) => void,
+): SetFilterValuesStratType => {
+    return {
+        All: (taskListId: string) =>
+            setFilterValue(taskListId, All_FILTER_VALUE),
+        Active: (taskListId: string) =>
+            setFilterValue(taskListId, ACTIVE_FILTER_VALUE),
+        Completed: (taskListId: string) =>
+            setFilterValue(taskListId, COMPLETED_FILTER_VALUE),
+    };
 };
 
 function TaskApp() {
@@ -99,13 +117,21 @@ function TaskApp() {
         tasks: Array<TaskType>,
         filter: FilterType,
     ): Array<TaskType> => {
-        const strat = strats[filter];
-        return strat(tasks);
+        if (filter !== All_FILTER_VALUE) {
+            const strat = filteringStrats[filter];
+            return strat(tasks);
+        }
+        return tasks;
     };
 
     const setFilterValue = (taskListId: string, filterValue: FilterType) => {
         taskListDispatch(setFilterAC(taskListId, filterValue));
     };
+
+    const filterValuesStrats = useMemo(
+        () => setFilterValuesStrats(setFilterValue),
+        [],
+    );
 
     const addTaskWrapper = (taskListId: string) => {
         return (taskTitle: string) => {
@@ -151,20 +177,13 @@ function TaskApp() {
 
     const setFilterValueWrapper = (taskListId: string) => {
         return (buttonName: ButtonNameType): void => {
-            switch (buttonName) {
-                case ACTIVE_BUTTON_NAME: {
-                    setFilterValue(taskListId, ACTIVE_FILTER_VALUE);
-                    return;
-                }
-                case COMPLETED_BUTTON_NAME: {
-                    setFilterValue(taskListId, COMPLETED_FILTER_VALUE);
-                    return;
-                }
-                default:
-                    setFilterValue(taskListId, All_FILTER_VALUE);
-                    return;
-            }
+            const strat = filterValuesStrats[buttonName];
+            strat(taskListId);
         };
+    };
+
+    const removeTaskListWrapper = (taskListId: string) => {
+        return () => removeTaskList(taskListId);
     };
 
     const jsxTaskLists = taskLists.map((tl) => {
@@ -174,7 +193,7 @@ function TaskApp() {
                 key={taskListId}
                 title={tl.title}
                 filteredTasks={filterTasks(tasks[taskListId], filter)}
-                removeTaskList={() => removeTaskList(taskListId)}
+                removeTaskList={removeTaskListWrapper(taskListId)}
                 addTask={addTaskWrapper(taskListId)}
                 removeTask={removeTaskWrapper(taskListId)}
                 changeTaskStatus={changeTaskStatusWrapper(taskListId)}

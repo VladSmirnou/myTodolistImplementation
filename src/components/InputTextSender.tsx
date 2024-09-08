@@ -1,10 +1,27 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, useState } from 'react';
 import { Button } from './SuperButton';
+// should be injected
 import { cleanInputText } from '@/utils/inputTextCleaner';
-
+//-------------------
 type InputTextSenderPropsType = {
     callBack: (text: string) => void;
     placeholder?: string;
+};
+
+const handleInputValue = (
+    inputValue: string,
+    setError: (e: string) => void,
+    setValue: (v: string) => void,
+    callBack: (t: string) => void,
+): void => {
+    const cleanedText = cleanInputText(inputValue);
+    if (cleanedText) {
+        callBack(cleanedText);
+        setValue('');
+        return;
+    }
+    setError('title cannot be empty!');
+    return;
 };
 
 export const InputTextSender = (props: InputTextSenderPropsType) => {
@@ -17,14 +34,13 @@ export const InputTextSender = (props: InputTextSenderPropsType) => {
     };
 
     const handleOnClick = () => {
-        const cleanedText = cleanInputText(value);
-        if (cleanedText) {
-            props.callBack(cleanedText);
-            setValue('');
-            return;
+        handleInputValue(value, setError, setValue, props.callBack);
+    };
+
+    const handleOnKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleInputValue(value, setError, setValue, props.callBack);
         }
-        setError('title cannot be empty!');
-        return;
     };
 
     return (
@@ -32,6 +48,7 @@ export const InputTextSender = (props: InputTextSenderPropsType) => {
             <input
                 type="text"
                 value={value}
+                onKeyDown={handleOnKeyDown}
                 onChange={handleOnChange}
                 placeholder={props.placeholder ?? 'Enter a title'}
             />
