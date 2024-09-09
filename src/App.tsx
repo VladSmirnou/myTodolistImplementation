@@ -94,6 +94,20 @@ const setFilterValueStrats = (
     };
 };
 
+const getButtonIsActiveLogic = (
+    buttonName: ButtonNameType,
+    currentFilterValue: FilterType,
+): boolean => {
+    return (
+        (currentFilterValue === All_FILTER_VALUE &&
+            buttonName === ALL_BUTTON_NAME) ||
+        (currentFilterValue === ACTIVE_FILTER_VALUE &&
+            buttonName === ACTIVE_BUTTON_NAME) ||
+        (currentFilterValue === COMPLETED_FILTER_VALUE &&
+            buttonName === COMPLETED_BUTTON_NAME)
+    );
+};
+
 function TaskApp() {
     const [taskLists, taskListDispatch] = useReducer(
         taskListReducer,
@@ -165,14 +179,7 @@ function TaskApp() {
 
     const getButtonIsActiveWrapper = (currentFilterValue: FilterType) => {
         return (buttonName: ButtonNameType): boolean => {
-            return (
-                (currentFilterValue === All_FILTER_VALUE &&
-                    buttonName === ALL_BUTTON_NAME) ||
-                (currentFilterValue === ACTIVE_FILTER_VALUE &&
-                    buttonName === ACTIVE_BUTTON_NAME) ||
-                (currentFilterValue === COMPLETED_FILTER_VALUE &&
-                    buttonName === COMPLETED_BUTTON_NAME)
-            );
+            return getButtonIsActiveLogic(buttonName, currentFilterValue);
         };
     };
 
