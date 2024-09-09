@@ -77,13 +77,13 @@ const filteringStrats: FilteringStratType = {
     completed: (tasks: Array<TaskType>) => tasks.filter((t) => t.isDone),
 };
 
-type SetFilterValuesStratType = {
+type SetFilterValueStratType = {
     [K in ButtonNameType]: (taskListId: string) => void;
 };
 
-const setFilterValuesStrats = (
+const setFilterValueStrats = (
     setFilterValue: (taskListId: string, filterValue: FilterType) => void,
-): SetFilterValuesStratType => {
+): SetFilterValueStratType => {
     return {
         All: (taskListId: string) =>
             setFilterValue(taskListId, All_FILTER_VALUE),
@@ -124,12 +124,13 @@ function TaskApp() {
         return tasks;
     };
 
-    const setFilterValue = (taskListId: string, filterValue: FilterType) => {
-        taskListDispatch(setFilterAC(taskListId, filterValue));
-    };
-
-    const filterValuesStrats = useMemo(
-        () => setFilterValuesStrats(setFilterValue),
+    const filterValueStrats = useMemo(
+        () =>
+            setFilterValueStrats(
+                (taskListId: string, filterValue: FilterType) => {
+                    taskListDispatch(setFilterAC(taskListId, filterValue));
+                },
+            ),
         [],
     );
 
@@ -177,13 +178,9 @@ function TaskApp() {
 
     const setFilterValueWrapper = (taskListId: string) => {
         return (buttonName: ButtonNameType): void => {
-            const strat = filterValuesStrats[buttonName];
+            const strat = filterValueStrats[buttonName];
             strat(taskListId);
         };
-    };
-
-    const removeTaskListWrapper = (taskListId: string) => {
-        return () => removeTaskList(taskListId);
     };
 
     const jsxTaskLists = taskLists.map((tl) => {
@@ -193,7 +190,7 @@ function TaskApp() {
                 key={taskListId}
                 title={tl.title}
                 filteredTasks={filterTasks(tasks[taskListId], filter)}
-                removeTaskList={removeTaskListWrapper(taskListId)}
+                removeTaskList={() => removeTaskList(taskListId)}
                 addTask={addTaskWrapper(taskListId)}
                 removeTask={removeTaskWrapper(taskListId)}
                 changeTaskStatus={changeTaskStatusWrapper(taskListId)}

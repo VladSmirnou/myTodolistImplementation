@@ -45,14 +45,6 @@ export const TaskList = (props: TaskListPropsType) => {
         };
     };
 
-    const setFilterValueWrapper = (buttonName: ButtonNameType) => {
-        return () => props.setFilterValue(buttonName);
-    };
-
-    const removeTaskWrapper = (taskId: number) => {
-        return () => props.removeTask(taskId);
-    };
-
     const tasksOrNoTasksText =
         props.filteredTasks.length ?
             <ul>
@@ -61,7 +53,7 @@ export const TaskList = (props: TaskListPropsType) => {
                         key={t.id}
                         isDone={t.isDone}
                         text={t.text}
-                        removeTask={removeTaskWrapper(t.id)}
+                        removeTask={() => props.removeTask(t.id)}
                         changeTaskStatus={changeTaskStatusWrapper(t.id)}
                         updateTaskText={updateTaskTextWrapper(t.id)}
                     />
@@ -85,7 +77,7 @@ export const TaskList = (props: TaskListPropsType) => {
                 className={
                     props.getButtonIsActive(ALL_BUTTON_NAME) ? s.active : ''
                 }
-                onClick={setFilterValueWrapper(ALL_BUTTON_NAME)}
+                onClick={() => props.setFilterValue(ALL_BUTTON_NAME)}
             >
                 {ALL_BUTTON_NAME}
             </Button>
@@ -93,7 +85,7 @@ export const TaskList = (props: TaskListPropsType) => {
                 className={
                     props.getButtonIsActive(ACTIVE_BUTTON_NAME) ? s.active : ''
                 }
-                onClick={setFilterValueWrapper(ACTIVE_BUTTON_NAME)}
+                onClick={() => props.setFilterValue(ACTIVE_BUTTON_NAME)}
             >
                 {ACTIVE_BUTTON_NAME}
             </Button>
@@ -103,7 +95,7 @@ export const TaskList = (props: TaskListPropsType) => {
                         s.active
                     :   ''
                 }
-                onClick={setFilterValueWrapper(COMPLETED_BUTTON_NAME)}
+                onClick={() => props.setFilterValue(COMPLETED_BUTTON_NAME)}
             >
                 {COMPLETED_BUTTON_NAME}
             </Button>
