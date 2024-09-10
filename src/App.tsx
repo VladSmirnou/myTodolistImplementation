@@ -17,16 +17,15 @@ import {
     setFilterAC,
     updateTaskListTitleAC,
     addTaskListAC,
-} from './model/taskListReducer';
+} from './model/tasklists-reducer';
 import {
     tasksReducer,
     addNewTasksAC,
-    removeTasksAC,
     addTaskAC,
     removeTaskAC,
     changeTaskStatusAC,
     updateTaskTextAC,
-} from './model/tasksReducer';
+} from './model/tasks-reducer';
 
 export type TaskListType = {
     id: string;
@@ -38,9 +37,9 @@ export type TasksType = {
     [key: string]: Array<TaskType>;
 };
 
-const All_FILTER_VALUE = 'all';
+export const All_FILTER_VALUE = 'all';
 const COMPLETED_FILTER_VALUE = 'completed';
-const ACTIVE_FILTER_VALUE = 'active';
+export const ACTIVE_FILTER_VALUE = 'active';
 
 export type FilterType =
     | typeof All_FILTER_VALUE
@@ -124,7 +123,7 @@ function TaskApp() {
 
     const removeTaskList = (taskListId: string) => {
         taskListDispatch(removeTaskListAC(taskListId));
-        tasksDispatch(removeTasksAC(taskListId));
+        tasksDispatch(removeTaskListAC(taskListId));
     };
 
     const filterTasks = (
@@ -190,12 +189,11 @@ function TaskApp() {
         };
     };
 
-    const jsxTaskLists = taskLists.map((tl) => {
-        const { id: taskListId, filter } = tl;
+    const jsxTaskLists = taskLists.map(({ id: taskListId, title, filter }) => {
         return (
             <TaskList
                 key={taskListId}
-                title={tl.title}
+                title={title}
                 filteredTasks={filterTasks(tasks[taskListId], filter)}
                 removeTaskList={() => removeTaskList(taskListId)}
                 addTask={addTaskWrapper(taskListId)}

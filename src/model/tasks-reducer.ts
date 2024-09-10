@@ -1,25 +1,15 @@
 import { TasksType } from '@/App';
 import { taskItemGetter } from '@/utils/taskItemGetter';
 import { TaskType } from '@/components/taskList/TaskList';
+import {
+    RemoveTaskListActionType,
+    AddTaskListActionType,
+} from './tasklists-reducer';
 
 const lastAddedTask = taskItemGetter(0);
 
-type AddNewTasksActionType = {
-    type: 'add_new_tasks';
-    payload: {
-        id: string;
-    };
-};
-
-type RemoveTaskListActionType = {
-    type: 'remove_tasks';
-    payload: {
-        taskListId: string;
-    };
-};
-
 type AddTaskActionType = {
-    type: 'add_task';
+    type: 'ADD-TASK';
     payload: {
         taskListId: string;
         taskTitle: string;
@@ -27,7 +17,7 @@ type AddTaskActionType = {
 };
 
 type RemoveTaskActionType = {
-    type: 'remove_task';
+    type: 'REMOVE-TASK';
     payload: {
         taskListId: string;
         taskId: number;
@@ -35,7 +25,7 @@ type RemoveTaskActionType = {
 };
 
 type ChgangeTaskStatusActionType = {
-    type: 'change_task_status';
+    type: 'CHANGE-TASK-STATUS';
     payload: {
         taskListId: string;
         taskId: number;
@@ -44,7 +34,7 @@ type ChgangeTaskStatusActionType = {
 };
 
 type UpdateTaskTextActionType = {
-    type: 'update_task_text';
+    type: 'UPDATE-TASK-TEXT';
     payload: {
         taskListId: string;
         taskId: number;
@@ -52,30 +42,34 @@ type UpdateTaskTextActionType = {
     };
 };
 
-type TasksActionType =
-    | AddNewTasksActionType
-    | RemoveTaskListActionType
+type ModifiedAddTaskListActionType = Omit<AddTaskListActionType, 'payload'> & {
+    payload: { id: string };
+};
+
+type ActionType =
     | AddTaskActionType
     | RemoveTaskActionType
     | ChgangeTaskStatusActionType
-    | UpdateTaskTextActionType;
+    | UpdateTaskTextActionType
+    | RemoveTaskListActionType
+    | ModifiedAddTaskListActionType;
 
 export const tasksReducer = (
     state: TasksType,
-    action: TasksActionType,
+    action: ActionType,
 ): TasksType => {
     switch (action.type) {
-        case 'add_new_tasks': {
+        case 'ADD-TASK-LIST': {
             return {
                 ...state,
                 [action.payload.id]: [],
             };
         }
-        case 'remove_tasks': {
+        case 'REMOVE-TASK-LIST': {
             delete state[action.payload.taskListId];
             return { ...state };
         }
-        case 'add_task': {
+        case 'ADD-TASK': {
             const { taskListId, taskTitle } = action.payload;
             const lastTaskId = lastAddedTask(state[taskListId])?.id ?? 0;
             const newTaskId = lastTaskId + 1;
@@ -90,14 +84,14 @@ export const tasksReducer = (
                 [taskListId]: [newTask, ...state[taskListId]],
             };
         }
-        case 'remove_task': {
+        case 'REMOVE-TASK': {
             const { taskListId, taskId } = action.payload;
             return {
                 ...state,
                 [taskListId]: state[taskListId].filter((t) => t.id !== taskId),
             };
         }
-        case 'change_task_status': {
+        case 'CHANGE-TASK-STATUS': {
             const { taskListId, taskId, newStatus } = action.payload;
             return {
                 ...state,
@@ -111,7 +105,7 @@ export const tasksReducer = (
                 ),
             };
         }
-        case 'update_task_text': {
+        case 'UPDATE-TASK-TEXT': {
             const { taskListId, taskId, newText } = action.payload;
             return {
                 ...state,
@@ -130,17 +124,10 @@ export const tasksReducer = (
     }
 };
 
-export const addNewTasksAC = (id: string): AddNewTasksActionType => {
+export const addNewTasksAC = (id: string): ModifiedAddTaskListActionType => {
     return {
-        type: 'add_new_tasks',
+        type: 'ADD-TASK-LIST',
         payload: { id },
-    };
-};
-
-export const removeTasksAC = (taskListId: string): RemoveTaskListActionType => {
-    return {
-        type: 'remove_tasks',
-        payload: { taskListId },
     };
 };
 
@@ -149,7 +136,7 @@ export const addTaskAC = (
     taskTitle: string,
 ): AddTaskActionType => {
     return {
-        type: 'add_task',
+        type: 'ADD-TASK',
         payload: {
             taskListId,
             taskTitle,
@@ -162,7 +149,7 @@ export const removeTaskAC = (
     taskId: number,
 ): RemoveTaskActionType => {
     return {
-        type: 'remove_task',
+        type: 'REMOVE-TASK',
         payload: {
             taskListId,
             taskId,
@@ -176,7 +163,7 @@ export const changeTaskStatusAC = (
     newStatus: boolean,
 ): ChgangeTaskStatusActionType => {
     return {
-        type: 'change_task_status',
+        type: 'CHANGE-TASK-STATUS',
         payload: { taskListId, taskId, newStatus },
     };
 };
@@ -187,7 +174,7 @@ export const updateTaskTextAC = (
     newText: string,
 ): UpdateTaskTextActionType => {
     return {
-        type: 'update_task_text',
+        type: 'UPDATE-TASK-TEXT',
         payload: { taskListId, taskId, newText },
     };
 };

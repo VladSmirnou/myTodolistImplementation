@@ -1,23 +1,23 @@
 import { TaskListType } from '@/App';
 import { FilterType } from '@/App';
 
-type AddTaskListActionType = {
-    type: 'add_task_list';
+export type AddTaskListActionType = {
+    type: 'ADD-TASK-LIST';
     payload: {
         id: string;
         title: string;
     };
 };
 
-type RemoveTaskListActionType = {
-    type: 'remove_task_list';
+export type RemoveTaskListActionType = {
+    type: 'REMOVE-TASK-LIST';
     payload: {
         taskListId: string;
     };
 };
 
 type SetFilterActionType = {
-    type: 'set_filter';
+    type: 'SET-FILTER';
     payload: {
         taskListId: string;
         filterValue: FilterType;
@@ -25,14 +25,14 @@ type SetFilterActionType = {
 };
 
 type UpdateTaskListTitleActionType = {
-    type: 'update_task_list_title';
+    type: 'UPDATE-TASK-LIST-TITLE';
     payload: {
         taskListId: string;
         newTitle: string;
     };
 };
 
-type TaskListActionType =
+type ActionType =
     | AddTaskListActionType
     | RemoveTaskListActionType
     | SetFilterActionType
@@ -40,10 +40,10 @@ type TaskListActionType =
 
 export const taskListReducer = (
     state: Array<TaskListType>,
-    action: TaskListActionType,
+    action: ActionType,
 ) => {
     switch (action.type) {
-        case 'add_task_list': {
+        case 'ADD-TASK-LIST': {
             const newTaskList: TaskListType = {
                 id: action.payload.id,
                 title: action.payload.title,
@@ -51,17 +51,17 @@ export const taskListReducer = (
             };
             return [newTaskList, ...state];
         }
-        case 'remove_task_list': {
+        case 'REMOVE-TASK-LIST': {
             return state.filter((tl) => tl.id !== action.payload.taskListId);
         }
-        case 'set_filter': {
+        case 'SET-FILTER': {
             return state.map((tl) =>
                 tl.id === action.payload.taskListId ?
                     { ...tl, filter: action.payload.filterValue }
                 :   tl,
             );
         }
-        case 'update_task_list_title': {
+        case 'UPDATE-TASK-LIST-TITLE': {
             return state.map((tl) =>
                 tl.id === action.payload.taskListId ?
                     {
@@ -81,7 +81,7 @@ export const addTaskListAC = (
     title: string,
 ): AddTaskListActionType => {
     return {
-        type: 'add_task_list',
+        type: 'ADD-TASK-LIST',
         payload: { id, title },
     };
 };
@@ -90,7 +90,7 @@ export const removeTaskListAC = (
     taskListId: string,
 ): RemoveTaskListActionType => {
     return {
-        type: 'remove_task_list',
+        type: 'REMOVE-TASK-LIST',
         payload: {
             taskListId,
         },
@@ -102,7 +102,7 @@ export const setFilterAC = (
     filterValue: FilterType,
 ): SetFilterActionType => {
     return {
-        type: 'set_filter',
+        type: 'SET-FILTER',
         payload: {
             taskListId,
             filterValue,
@@ -115,7 +115,7 @@ export const updateTaskListTitleAC = (
     newTitle: string,
 ): UpdateTaskListTitleActionType => {
     return {
-        type: 'update_task_list_title',
+        type: 'UPDATE-TASK-LIST-TITLE',
         payload: {
             taskListId,
             newTitle,
