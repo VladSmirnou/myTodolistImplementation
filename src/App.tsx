@@ -20,7 +20,6 @@ import {
 } from './model/tasklists-reducer';
 import {
     tasksReducer,
-    addNewTasksAC,
     addTaskAC,
     removeTaskAC,
     changeTaskStatusAC,
@@ -116,9 +115,9 @@ function TaskApp() {
     const [tasks, tasksDispatch] = useReducer(tasksReducer, initialTasks);
 
     const addTaskList = (title: string): void => {
-        const id = getUniqueId();
-        taskListDispatch(addTaskListAC(id, title));
-        tasksDispatch(addNewTasksAC(id));
+        const action = addTaskListAC(title);
+        taskListDispatch(action);
+        tasksDispatch(action);
     };
 
     const removeTaskList = (taskListId: string) => {

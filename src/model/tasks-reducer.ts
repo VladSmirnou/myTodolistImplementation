@@ -42,17 +42,13 @@ type UpdateTaskTextActionType = {
     };
 };
 
-type ModifiedAddTaskListActionType = Omit<AddTaskListActionType, 'payload'> & {
-    payload: { id: string };
-};
-
 type ActionType =
     | AddTaskActionType
     | RemoveTaskActionType
     | ChgangeTaskStatusActionType
     | UpdateTaskTextActionType
     | RemoveTaskListActionType
-    | ModifiedAddTaskListActionType;
+    | AddTaskListActionType;
 
 export const tasksReducer = (
     state: TasksType,
@@ -122,13 +118,6 @@ export const tasksReducer = (
         default:
             return state;
     }
-};
-
-export const addNewTasksAC = (id: string): ModifiedAddTaskListActionType => {
-    return {
-        type: 'ADD-TASK-LIST',
-        payload: { id },
-    };
 };
 
 export const addTaskAC = (

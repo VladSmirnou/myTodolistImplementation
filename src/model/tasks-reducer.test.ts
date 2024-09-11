@@ -1,12 +1,11 @@
 import {
     tasksReducer,
-    addNewTasksAC,
     addTaskAC,
     removeTaskAC,
     changeTaskStatusAC,
     updateTaskTextAC,
 } from './tasks-reducer';
-import { removeTaskListAC } from './tasklists-reducer';
+import { removeTaskListAC, addTaskListAC } from './tasklists-reducer';
 import { TasksType } from '@/App';
 import { getUniqueId } from '@/utils/uniqueIdProvider';
 
@@ -29,14 +28,12 @@ beforeEach(() => {
 });
 
 test('should add an empty tasks array', () => {
-    const newTaskListId = getUniqueId();
-
-    const newState = tasksReducer(oldState, addNewTasksAC(newTaskListId));
+    const action = addTaskListAC('title');
+    const newState = tasksReducer(oldState, action);
     const keys = Object.keys(newState);
 
     expect(keys.length).toBe(3);
-    expect(Object.hasOwn(newState, newTaskListId)).toBeTruthy();
-    expect(newState[newTaskListId]).toEqual([]);
+    expect(newState[action.payload.id]).toEqual([]);
 });
 
 test(`should remove corresponding tasks

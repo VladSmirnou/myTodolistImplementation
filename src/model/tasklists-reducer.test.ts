@@ -20,13 +20,9 @@ beforeEach(() => {
     ];
 });
 
-test('should add a task list', () => {
-    const newTaskListTitle = 'New Task Title',
-        newTaskListId = getUniqueId();
-    const newState = taskListReducer(
-        oldState,
-        addTaskListAC(newTaskListId, newTaskListTitle),
-    );
+test('should add a new task list', () => {
+    const newTaskListTitle = 'New Task Title';
+    const newState = taskListReducer(oldState, addTaskListAC(newTaskListTitle));
 
     expect(newState.length).toBe(3);
     expect(newState[0].title).toBe(newTaskListTitle);

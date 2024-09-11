@@ -1,5 +1,6 @@
 import { TaskListType } from '@/App';
 import { FilterType } from '@/App';
+import { getUniqueId } from '@/utils/uniqueIdProvider';
 
 export type AddTaskListActionType = {
     type: 'ADD-TASK-LIST';
@@ -76,10 +77,8 @@ export const taskListReducer = (
     }
 };
 
-export const addTaskListAC = (
-    id: string,
-    title: string,
-): AddTaskListActionType => {
+export const addTaskListAC = (title: string): AddTaskListActionType => {
+    const id = getUniqueId();
     return {
         type: 'ADD-TASK-LIST',
         payload: { id, title },
