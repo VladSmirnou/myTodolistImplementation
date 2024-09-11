@@ -2,37 +2,10 @@ import { TaskListType } from '@/App';
 import { FilterType } from '@/App';
 import { getUniqueId } from '@/utils/uniqueIdProvider';
 
-export type AddTaskListActionType = {
-    type: 'ADD-TASK-LIST';
-    payload: {
-        id: string;
-        title: string;
-    };
-};
-
-export type RemoveTaskListActionType = {
-    type: 'REMOVE-TASK-LIST';
-    payload: {
-        taskListId: string;
-    };
-};
-
-type SetFilterActionType = {
-    type: 'SET-FILTER';
-    payload: {
-        taskListId: string;
-        filterValue: FilterType;
-    };
-};
-
-type UpdateTaskListTitleActionType = {
-    type: 'UPDATE-TASK-LIST-TITLE';
-    payload: {
-        taskListId: string;
-        newTitle: string;
-    };
-};
-
+export type AddTaskListActionType = ReturnType<typeof addTaskListAC>;
+export type RemoveTaskListActionType = ReturnType<typeof removeTaskListAC>;
+type SetFilterActionType = ReturnType<typeof setFilterAC>;
+type UpdateTaskListTitleActionType = ReturnType<typeof updateTaskListTitleAC>;
 type ActionType =
     | AddTaskListActionType
     | RemoveTaskListActionType
@@ -77,47 +50,39 @@ export const taskListReducer = (
     }
 };
 
-export const addTaskListAC = (title: string): AddTaskListActionType => {
+export const addTaskListAC = (title: string) => {
     const id = getUniqueId();
     return {
         type: 'ADD-TASK-LIST',
         payload: { id, title },
-    };
+    } as const;
 };
 
-export const removeTaskListAC = (
-    taskListId: string,
-): RemoveTaskListActionType => {
+export const removeTaskListAC = (taskListId: string) => {
     return {
         type: 'REMOVE-TASK-LIST',
         payload: {
             taskListId,
         },
-    };
+    } as const;
 };
 
-export const setFilterAC = (
-    taskListId: string,
-    filterValue: FilterType,
-): SetFilterActionType => {
+export const setFilterAC = (taskListId: string, filterValue: FilterType) => {
     return {
         type: 'SET-FILTER',
         payload: {
             taskListId,
             filterValue,
         },
-    };
+    } as const;
 };
 
-export const updateTaskListTitleAC = (
-    taskListId: string,
-    newTitle: string,
-): UpdateTaskListTitleActionType => {
+export const updateTaskListTitleAC = (payload: {
+    taskListId: string;
+    newTitle: string;
+}) => {
     return {
         type: 'UPDATE-TASK-LIST-TITLE',
-        payload: {
-            taskListId,
-            newTitle,
-        },
-    };
+        payload,
+    } as const;
 };

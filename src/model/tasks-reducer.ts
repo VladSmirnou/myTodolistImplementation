@@ -8,40 +8,10 @@ import {
 
 const lastAddedTask = taskItemGetter(0);
 
-type AddTaskActionType = {
-    type: 'ADD-TASK';
-    payload: {
-        taskListId: string;
-        taskTitle: string;
-    };
-};
-
-type RemoveTaskActionType = {
-    type: 'REMOVE-TASK';
-    payload: {
-        taskListId: string;
-        taskId: number;
-    };
-};
-
-type ChgangeTaskStatusActionType = {
-    type: 'CHANGE-TASK-STATUS';
-    payload: {
-        taskListId: string;
-        taskId: number;
-        newStatus: boolean;
-    };
-};
-
-type UpdateTaskTextActionType = {
-    type: 'UPDATE-TASK-TEXT';
-    payload: {
-        taskListId: string;
-        taskId: number;
-        newText: string;
-    };
-};
-
+type AddTaskActionType = ReturnType<typeof addTaskAC>;
+type RemoveTaskActionType = ReturnType<typeof removeTaskAC>;
+type ChgangeTaskStatusActionType = ReturnType<typeof changeTaskStatusAC>;
+type UpdateTaskTextActionType = ReturnType<typeof updateTaskTextAC>;
 type ActionType =
     | AddTaskActionType
     | RemoveTaskActionType
@@ -120,50 +90,44 @@ export const tasksReducer = (
     }
 };
 
-export const addTaskAC = (
-    taskListId: string,
-    taskTitle: string,
-): AddTaskActionType => {
+export const addTaskAC = (payload: {
+    taskListId: string;
+    taskTitle: string;
+}) => {
     return {
         type: 'ADD-TASK',
-        payload: {
-            taskListId,
-            taskTitle,
-        },
-    };
+        payload,
+    } as const;
 };
 
-export const removeTaskAC = (
-    taskListId: string,
-    taskId: number,
-): RemoveTaskActionType => {
+export const removeTaskAC = (taskListId: string, taskId: number) => {
     return {
         type: 'REMOVE-TASK',
         payload: {
             taskListId,
             taskId,
         },
-    };
+    } as const;
 };
 
 export const changeTaskStatusAC = (
     taskListId: string,
     taskId: number,
     newStatus: boolean,
-): ChgangeTaskStatusActionType => {
+) => {
     return {
         type: 'CHANGE-TASK-STATUS',
         payload: { taskListId, taskId, newStatus },
-    };
+    } as const;
 };
 
-export const updateTaskTextAC = (
-    taskListId: string,
-    taskId: number,
-    newText: string,
-): UpdateTaskTextActionType => {
+export const updateTaskTextAC = (payload: {
+    taskListId: string;
+    taskId: number;
+    newText: string;
+}) => {
     return {
         type: 'UPDATE-TASK-TEXT',
-        payload: { taskListId, taskId, newText },
-    };
+        payload,
+    } as const;
 };

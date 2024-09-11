@@ -148,7 +148,7 @@ function TaskApp() {
 
     const addTaskWrapper = (taskListId: string) => {
         return (taskTitle: string) => {
-            tasksDispatch(addTaskAC(taskListId, taskTitle));
+            tasksDispatch(addTaskAC({ taskListId, taskTitle }));
         };
     };
 
@@ -166,12 +166,12 @@ function TaskApp() {
 
     const updateTaskListTitleWrapper = (taskListId: string) => {
         return (newTitle: string) =>
-            taskListDispatch(updateTaskListTitleAC(taskListId, newTitle));
+            taskListDispatch(updateTaskListTitleAC({ taskListId, newTitle }));
     };
 
     const updateTaskTextWrapper = (taskListId: string) => {
         return (taskId: number, newText: string) => {
-            tasksDispatch(updateTaskTextAC(taskListId, taskId, newText));
+            tasksDispatch(updateTaskTextAC({ taskListId, taskId, newText }));
         };
     };
 

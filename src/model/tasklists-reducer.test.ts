@@ -53,7 +53,10 @@ test('should update a title of a proper task list', () => {
 
     const newState = taskListReducer(
         oldState,
-        updateTaskListTitleAC(taskList1Id, updatedTaskListTitle),
+        updateTaskListTitleAC({
+            taskListId: taskList1Id,
+            newTitle: updatedTaskListTitle,
+        }),
     );
 
     expect(newState[0].title).toBe(updatedTaskListTitle);

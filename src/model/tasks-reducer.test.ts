@@ -50,7 +50,7 @@ test('should add a new task to a proper task list', () => {
 
     const newState = tasksReducer(
         oldState,
-        addTaskAC(taskList1Id, newTaskText),
+        addTaskAC({ taskListId: taskList1Id, taskTitle: newTaskText }),
     );
 
     expect(newState[taskList1Id].length).toBe(3);
@@ -86,7 +86,11 @@ test('should change the text of a proper task', () => {
 
     const newState = tasksReducer(
         oldState,
-        updateTaskTextAC(taskList1Id, taskId, newTaskText),
+        updateTaskTextAC({
+            taskListId: taskList1Id,
+            taskId,
+            newText: newTaskText,
+        }),
     );
 
     expect(newState[taskList1Id][0].text).toBe('hello world');
