@@ -71,8 +71,10 @@ type FilteringStratType = {
 };
 
 const filteringStrats: FilteringStratType = {
-    active: (tasks: Array<TaskType>) => tasks.filter((t) => !t.isDone),
-    completed: (tasks: Array<TaskType>) => tasks.filter((t) => t.isDone),
+    [ACTIVE_FILTER_VALUE]: (tasks: Array<TaskType>) =>
+        tasks.filter((t) => !t.isDone),
+    [COMPLETED_FILTER_VALUE]: (tasks: Array<TaskType>) =>
+        tasks.filter((t) => t.isDone),
 };
 
 type SetFilterValueStratType = {
@@ -83,11 +85,11 @@ const setFilterValueStrats = (
     setFilterValue: (taskListId: string, filterValue: FilterType) => void,
 ): SetFilterValueStratType => {
     return {
-        All: (taskListId: string) =>
+        [ALL_BUTTON_NAME]: (taskListId: string) =>
             setFilterValue(taskListId, All_FILTER_VALUE),
-        Active: (taskListId: string) =>
+        [ACTIVE_BUTTON_NAME]: (taskListId: string) =>
             setFilterValue(taskListId, ACTIVE_FILTER_VALUE),
-        Completed: (taskListId: string) =>
+        [COMPLETED_BUTTON_NAME]: (taskListId: string) =>
             setFilterValue(taskListId, COMPLETED_FILTER_VALUE),
     };
 };
