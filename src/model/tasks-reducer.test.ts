@@ -7,10 +7,10 @@ import {
 } from './tasks-reducer';
 import { removeTaskListAC, addTaskListAC } from './tasklists-reducer';
 import { TasksType } from '@/App';
-import { getUniqueId } from '@/utils/uniqueIdProvider';
+import { getUniqueStringId } from '@/utils/uniqueIdProvider';
 
-const taskList1Id = getUniqueId();
-const taskList2Id = getUniqueId();
+const taskList1Id = getUniqueStringId();
+const taskList2Id = getUniqueStringId();
 
 let oldState: TasksType;
 

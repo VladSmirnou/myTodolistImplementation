@@ -1,4 +1,4 @@
-import { useMemo, useReducer } from 'react';
+import { useCallback, useMemo, useReducer } from 'react';
 import { InputTextSender } from './components/InputTextSender';
 import {
     TaskList,
@@ -7,9 +7,10 @@ import {
     ALL_BUTTON_NAME,
     ACTIVE_BUTTON_NAME,
     COMPLETED_BUTTON_NAME,
+    FilterType,
 } from './components/taskList/TaskList';
 // should be injected:
-import { getUniqueId } from './utils/uniqueIdProvider';
+import { getUniqueStringId } from './utils/uniqueIdProvider';
 // ------------------
 import {
     taskListReducer,
@@ -32,21 +33,16 @@ export type TaskListType = {
     filter: FilterType;
 };
 
+export const All_FILTER_VALUE = 'all';
+export const COMPLETED_FILTER_VALUE = 'completed';
+export const ACTIVE_FILTER_VALUE = 'active';
+
 export type TasksType = {
     [key: string]: Array<TaskType>;
 };
 
-export const All_FILTER_VALUE = 'all';
-const COMPLETED_FILTER_VALUE = 'completed';
-export const ACTIVE_FILTER_VALUE = 'active';
-
-export type FilterType =
-    | typeof All_FILTER_VALUE
-    | typeof COMPLETED_FILTER_VALUE
-    | typeof ACTIVE_FILTER_VALUE;
-
-const taskList1Id = getUniqueId();
-const taskList2Id = getUniqueId();
+const taskList1Id = getUniqueStringId();
+const taskList2Id = getUniqueStringId();
 
 const initialTaskLists: Array<TaskListType> = [
     { id: taskList1Id, title: 'first', filter: All_FILTER_VALUE },
@@ -94,7 +90,18 @@ const setFilterValueStrats = (
     };
 };
 
-const getButtonIsActiveLogic = (
+const filterTasks = (
+    tasks: Array<TaskType>,
+    filter: FilterType,
+): Array<TaskType> => {
+    if (filter !== All_FILTER_VALUE) {
+        const strat = filteringStrats[filter];
+        return strat(tasks);
+    }
+    return tasks;
+};
+
+const getButtonIsActive = (
     buttonName: ButtonNameType,
     currentFilterValue: FilterType,
 ): boolean => {
@@ -116,27 +123,16 @@ function TaskApp() {
 
     const [tasks, tasksDispatch] = useReducer(tasksReducer, initialTasks);
 
-    const addTaskList = (title: string): void => {
+    const addTaskList = useCallback((title: string): void => {
         const action = addTaskListAC(title);
         taskListDispatch(action);
         tasksDispatch(action);
-    };
+    }, []);
 
-    const removeTaskList = (taskListId: string) => {
+    const removeTaskList = useCallback((taskListId: string) => {
         taskListDispatch(removeTaskListAC(taskListId));
         tasksDispatch(removeTaskListAC(taskListId));
-    };
-
-    const filterTasks = (
-        tasks: Array<TaskType>,
-        filter: FilterType,
-    ): Array<TaskType> => {
-        if (filter !== All_FILTER_VALUE) {
-            const strat = filteringStrats[filter];
-            return strat(tasks);
-        }
-        return tasks;
-    };
+    }, []);
 
     const filterValueStrats = useMemo(
         () =>
@@ -148,62 +144,59 @@ function TaskApp() {
         [],
     );
 
-    const addTaskWrapper = (taskListId: string) => {
-        return (taskTitle: string) => {
-            tasksDispatch(addTaskAC({ taskListId, taskTitle }));
-        };
-    };
+    const addTask = useCallback((taskListId: string, taskTitle: string) => {
+        tasksDispatch(addTaskAC({ taskListId, taskTitle }));
+    }, []);
 
-    const removeTaskWrapper = (taskListId: string) => {
-        return (taskId: number) => {
-            tasksDispatch(removeTaskAC(taskListId, taskId));
-        };
-    };
+    const removeTask = useCallback((taskListId: string, taskId: number) => {
+        tasksDispatch(removeTaskAC(taskListId, taskId));
+    }, []);
 
-    const changeTaskStatusWrapper = (taskListId: string) => {
-        return (taskId: number, newStatus: boolean) => {
+    const changeTaskStatus = useCallback(
+        (taskListId: string, taskId: number, newStatus: boolean) => {
             tasksDispatch(changeTaskStatusAC(taskListId, taskId, newStatus));
-        };
-    };
+        },
+        [],
+    );
 
-    const updateTaskListTitleWrapper = (taskListId: string) => {
-        return (newTitle: string) =>
+    const updateTaskListTitle = useCallback(
+        (taskListId: string, newTitle: string) => {
             taskListDispatch(updateTaskListTitleAC({ taskListId, newTitle }));
-    };
+        },
+        [],
+    );
 
-    const updateTaskTextWrapper = (taskListId: string) => {
-        return (taskId: number, newText: string) => {
+    const updateTaskText = useCallback(
+        (taskListId: string, taskId: number, newText: string) => {
             tasksDispatch(updateTaskTextAC({ taskListId, taskId, newText }));
-        };
-    };
+        },
+        [],
+    );
 
-    const getButtonIsActiveWrapper = (currentFilterValue: FilterType) => {
-        return (buttonName: ButtonNameType): boolean => {
-            return getButtonIsActiveLogic(buttonName, currentFilterValue);
-        };
-    };
-
-    const setFilterValueWrapper = (taskListId: string) => {
-        return (buttonName: ButtonNameType): void => {
+    const setFilterValue = useCallback(
+        (taskListId: string, buttonName: ButtonNameType): void => {
             const strat = filterValueStrats[buttonName];
             strat(taskListId);
-        };
-    };
+        },
+        [filterValueStrats],
+    );
 
     const jsxTaskLists = taskLists.map(({ id: taskListId, title, filter }) => {
         return (
             <TaskList
+                filterValue={filter}
+                taskListId={taskListId}
                 key={taskListId}
                 title={title}
                 filteredTasks={filterTasks(tasks[taskListId], filter)}
-                removeTaskList={() => removeTaskList(taskListId)}
-                addTask={addTaskWrapper(taskListId)}
-                removeTask={removeTaskWrapper(taskListId)}
-                changeTaskStatus={changeTaskStatusWrapper(taskListId)}
-                updateTaskListTitle={updateTaskListTitleWrapper(taskListId)}
-                updateTaskText={updateTaskTextWrapper(taskListId)}
-                getButtonIsActive={getButtonIsActiveWrapper(filter)}
-                setFilterValue={setFilterValueWrapper(taskListId)}
+                removeTaskList={removeTaskList}
+                addTask={addTask}
+                removeTask={removeTask}
+                changeTaskStatus={changeTaskStatus}
+                updateTaskListTitle={updateTaskListTitle}
+                updateTaskText={updateTaskText}
+                getButtonIsActive={getButtonIsActive}
+                setFilterValue={setFilterValue}
             />
         );
     });

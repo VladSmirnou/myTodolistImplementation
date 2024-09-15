@@ -1,5 +1,5 @@
-import { TaskListType, All_FILTER_VALUE, ACTIVE_FILTER_VALUE } from '@/App';
-import { getUniqueId } from '@/utils/uniqueIdProvider';
+import { TaskListType, ACTIVE_FILTER_VALUE, All_FILTER_VALUE } from '@/App';
+import { getUniqueStringId } from '@/utils/uniqueIdProvider';
 import {
     taskListReducer,
     addTaskListAC,
@@ -8,8 +8,8 @@ import {
     updateTaskListTitleAC,
 } from './tasklists-reducer';
 
-const taskList1Id = getUniqueId();
-const taskList2Id = getUniqueId();
+const taskList1Id = getUniqueStringId();
+const taskList2Id = getUniqueStringId();
 
 let oldState: Array<TaskListType>;
 

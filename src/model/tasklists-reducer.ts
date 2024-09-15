@@ -1,6 +1,6 @@
 import { TaskListType } from '@/App';
-import { FilterType } from '@/App';
-import { getUniqueId } from '@/utils/uniqueIdProvider';
+import { FilterType } from '@/components/taskList/TaskList';
+import { getUniqueStringId } from '@/utils/uniqueIdProvider';
 
 export type AddTaskListActionType = ReturnType<typeof addTaskListAC>;
 export type RemoveTaskListActionType = ReturnType<typeof removeTaskListAC>;
@@ -51,7 +51,7 @@ export const taskListReducer = (
 };
 
 export const addTaskListAC = (title: string) => {
-    const id = getUniqueId();
+    const id = getUniqueStringId();
     return {
         type: 'ADD-TASK-LIST',
         payload: { id, title },

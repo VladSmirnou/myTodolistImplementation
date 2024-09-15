@@ -1,3 +1,3 @@
 import { v1 } from 'uuid';
 
-export const getUniqueId = (): string => v1();
+export const getUniqueStringId = (): string => v1();
