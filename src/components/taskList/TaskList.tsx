@@ -4,6 +4,7 @@ import { Task } from './task/Task';
 import { EditableSpan } from '../EditableSpan';
 import s from './taskList.module.css';
 import { memo, useCallback } from 'react';
+import { zip } from '@/utils/zip';
 
 export type FilterType = 'all' | 'active' | 'completed';
 
@@ -46,6 +47,45 @@ type TaskListPropsType = {
         currentFilterValue: FilterType,
     ) => boolean;
     onSetFilterValue: (taskListId: string, buttonName: ButtonNameType) => void;
+};
+
+const arePropsEqual = (
+    oldProps: TaskListPropsType,
+    newProps: TaskListPropsType,
+) => {
+    const { filteredTasks: oldTasks, ...noTasksOld } = oldProps;
+    const { filteredTasks: newTasks, ...noTasksNew } = newProps;
+    for (const key in noTasksOld) {
+        // dunno how to make types for this case tho
+        if (!Object.is(noTasksOld[key], noTasksNew[key])) {
+            return false;
+        }
+    }
+    // Because I filter tasks in the App, filteredTasks array
+    // will always be a new array, if the filter value is not 'all'.
+    // Because of that, merely changing a filter value will trigger a new
+    // re-render of all TaskList components.
+    // So here I check if the array length is the same as in the previous
+    // run (no new tasks) && filtered tasks in the array are the same
+    // as in the previous run (no modifications).
+    // If this is true, and everything else is the same, then I
+    // return true, so no new re-render of this component is needed.
+
+    // It is probably better to move filtering tasks logic to the
+    // TaskList component, and implement a check if
+    // old tasks are the same as new tasks.
+    if (oldTasks.length !== newTasks.length) {
+        return false;
+    }
+    for (const [
+        { text: oldText, isDone: oldStatus },
+        { text: newText, isDone: newStatus },
+    ] of zip(oldTasks, newTasks)) {
+        if (!(oldText === newText && oldStatus === newStatus)) {
+            return false;
+        }
+    }
+    return true;
 };
 
 export const TaskList = memo(function TaskList({
@@ -160,4 +200,4 @@ export const TaskList = memo(function TaskList({
             </Button>
         </div>
     );
-});
+}, arePropsEqual);
