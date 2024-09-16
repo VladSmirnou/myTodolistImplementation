@@ -189,14 +189,14 @@ function TaskApp() {
                 key={taskListId}
                 title={title}
                 filteredTasks={filterTasks(tasks[taskListId], filter)}
-                removeTaskList={removeTaskList}
-                addTask={addTask}
-                removeTask={removeTask}
-                changeTaskStatus={changeTaskStatus}
-                updateTaskListTitle={updateTaskListTitle}
-                updateTaskText={updateTaskText}
                 getButtonIsActive={getButtonIsActive}
-                setFilterValue={setFilterValue}
+                onRemoveTaskList={removeTaskList}
+                onAddTask={addTask}
+                onRemoveTask={removeTask}
+                onChangeTaskStatus={changeTaskStatus}
+                onUpdateTaskListTitle={updateTaskListTitle}
+                onUpdateTaskText={updateTaskText}
+                onSetFilterValue={setFilterValue}
             />
         );
     });

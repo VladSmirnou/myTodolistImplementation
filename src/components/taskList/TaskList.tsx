@@ -26,17 +26,17 @@ type TaskListPropsType = {
     taskListId: string;
     filterValue: FilterType;
     title: string;
-    removeTaskList: (taskListId: string) => void;
+    onRemoveTaskList: (taskListId: string) => void;
     filteredTasks: Array<TaskType>;
-    addTask: (taskListId: string, taskTitle: string) => void;
-    removeTask: (taskListId: string, taskId: number) => void;
-    changeTaskStatus: (
+    onAddTask: (taskListId: string, taskTitle: string) => void;
+    onRemoveTask: (taskListId: string, taskId: number) => void;
+    onChangeTaskStatus: (
         taskListId: string,
         taskId: number,
         newStatus: boolean,
     ) => void;
-    updateTaskListTitle: (taskListId: string, newTitle: string) => void;
-    updateTaskText: (
+    onUpdateTaskListTitle: (taskListId: string, newTitle: string) => void;
+    onUpdateTaskText: (
         taskListId: string,
         taskId: number,
         newText: string,
@@ -45,54 +45,58 @@ type TaskListPropsType = {
         buttonName: ButtonNameType,
         currentFilterValue: FilterType,
     ) => boolean;
-    setFilterValue: (taskListId: string, buttonName: ButtonNameType) => void;
+    onSetFilterValue: (taskListId: string, buttonName: ButtonNameType) => void;
 };
 
 export const TaskList = memo(function TaskList({
     taskListId,
     filterValue,
     title,
-    removeTaskList,
+    onRemoveTaskList,
     filteredTasks,
-    addTask,
-    removeTask,
-    changeTaskStatus,
-    updateTaskListTitle,
-    updateTaskText,
+    onAddTask,
+    onRemoveTask,
+    onChangeTaskStatus,
+    onUpdateTaskListTitle,
+    onUpdateTaskText,
     getButtonIsActive,
-    setFilterValue,
+    onSetFilterValue,
 }: TaskListPropsType) {
-    const addTaskHandler = (taskText: string) => {
-        addTask(taskListId, taskText);
+    const handleAddTask = (taskText: string) => {
+        onAddTask(taskListId, taskText);
     };
 
-    const updateTaskTextHandler = useCallback(
+    const handleUpdateTaskText = useCallback(
         (taskId: number, newText: string) => {
-            updateTaskText(taskListId, taskId, newText);
+            onUpdateTaskText(taskListId, taskId, newText);
         },
-        [taskListId, updateTaskText],
+        [taskListId, onUpdateTaskText],
     );
 
-    const changeTaskStatusHandler = useCallback(
+    const handleChangeTaskStatus = useCallback(
         (taskId: number, newStatus: boolean) => {
-            changeTaskStatus(taskListId, taskId, newStatus);
+            onChangeTaskStatus(taskListId, taskId, newStatus);
         },
-        [taskListId, changeTaskStatus],
+        [taskListId, onChangeTaskStatus],
     );
 
-    const removeTaskHandler = useCallback(
+    const handleRemoveTask = useCallback(
         (taskId: number) => {
-            removeTask(taskListId, taskId);
+            onRemoveTask(taskListId, taskId);
         },
-        [taskListId, removeTask],
+        [taskListId, onRemoveTask],
     );
 
-    const updateTaskListTitleHandler = (newTitle: string) => {
-        updateTaskListTitle(taskListId, newTitle);
+    const handleUpdateTaskListTitle = (newTitle: string) => {
+        onUpdateTaskListTitle(taskListId, newTitle);
     };
 
-    const removeTaskListHandler = () => {
-        removeTaskList(taskListId);
+    const handleRemoveTaskList = () => {
+        onRemoveTaskList(taskListId);
+    };
+
+    const handleSetFilterValue = (buttonName: ButtonNameType) => {
+        onSetFilterValue(taskListId, buttonName);
     };
 
     const tasksOrNoTasksText =
@@ -104,9 +108,9 @@ export const TaskList = memo(function TaskList({
                         taskId={t.id}
                         isDone={t.isDone}
                         text={t.text}
-                        removeTask={removeTaskHandler}
-                        changeTaskStatus={changeTaskStatusHandler}
-                        updateTaskText={updateTaskTextHandler}
+                        onRemoveTask={handleRemoveTask}
+                        onChangeTaskStatus={handleChangeTaskStatus}
+                        onUpdateTaskText={handleUpdateTaskText}
                     />
                 ))}
             </ul>
@@ -116,13 +120,13 @@ export const TaskList = memo(function TaskList({
         <div>
             <div>
                 <h2>
-                    <EditableSpan callBack={updateTaskListTitleHandler}>
+                    <EditableSpan callBack={handleUpdateTaskListTitle}>
                         {title}
                     </EditableSpan>
                 </h2>
-                <Button onClick={removeTaskListHandler}>X</Button>
+                <Button onClick={handleRemoveTaskList}>X</Button>
             </div>
-            <InputTextSender callBack={addTaskHandler} />
+            <InputTextSender callBack={handleAddTask} />
             {tasksOrNoTasksText}
             <Button
                 className={
@@ -130,7 +134,7 @@ export const TaskList = memo(function TaskList({
                         s.active
                     :   ''
                 }
-                onClick={() => setFilterValue(taskListId, ALL_BUTTON_NAME)}
+                onClick={() => handleSetFilterValue(ALL_BUTTON_NAME)}
             >
                 {ALL_BUTTON_NAME}
             </Button>
@@ -140,7 +144,7 @@ export const TaskList = memo(function TaskList({
                         s.active
                     :   ''
                 }
-                onClick={() => setFilterValue(taskListId, ACTIVE_BUTTON_NAME)}
+                onClick={() => handleSetFilterValue(ACTIVE_BUTTON_NAME)}
             >
                 {ACTIVE_BUTTON_NAME}
             </Button>
@@ -150,9 +154,7 @@ export const TaskList = memo(function TaskList({
                         s.active
                     :   ''
                 }
-                onClick={() =>
-                    setFilterValue(taskListId, COMPLETED_BUTTON_NAME)
-                }
+                onClick={() => handleSetFilterValue(COMPLETED_BUTTON_NAME)}
             >
                 {COMPLETED_BUTTON_NAME}
             </Button>

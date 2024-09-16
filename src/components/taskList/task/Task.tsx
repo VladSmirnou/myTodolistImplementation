@@ -6,24 +6,24 @@ type TaskPropsType = {
     taskId: number;
     isDone: boolean;
     text: string;
-    removeTask: (taskId: number) => void;
-    changeTaskStatus: (taskId: number, newStatus: boolean) => void;
-    updateTaskText: (taskId: number, newText: string) => void;
+    onRemoveTask: (taskId: number) => void;
+    onChangeTaskStatus: (taskId: number, newStatus: boolean) => void;
+    onUpdateTaskText: (taskId: number, newText: string) => void;
 };
 
 export const Task = memo(function Task(props: TaskPropsType) {
-    const changeTaskStatus = ({
+    const handleChangeTaskStatus = ({
         currentTarget: { checked },
     }: ChangeEvent<HTMLInputElement>) => {
-        props.changeTaskStatus(props.taskId, checked);
+        props.onChangeTaskStatus(props.taskId, checked);
     };
 
-    const removeTask = () => {
-        props.removeTask(props.taskId);
+    const handleRemoveTask = () => {
+        props.onRemoveTask(props.taskId);
     };
 
-    const updateTaskText = (newText: string) => {
-        props.updateTaskText(props.taskId, newText);
+    const handleUpdateTaskText = (newText: string) => {
+        props.onUpdateTaskText(props.taskId, newText);
     };
 
     return (
@@ -31,10 +31,12 @@ export const Task = memo(function Task(props: TaskPropsType) {
             <input
                 type="checkbox"
                 checked={props.isDone}
-                onChange={changeTaskStatus}
+                onChange={handleChangeTaskStatus}
             />
-            <EditableSpan callBack={updateTaskText}>{props.text}</EditableSpan>
-            <Button onClick={removeTask}>X</Button>
+            <EditableSpan callBack={handleUpdateTaskText}>
+                {props.text}
+            </EditableSpan>
+            <Button onClick={handleRemoveTask}>X</Button>
         </li>
     );
 });
