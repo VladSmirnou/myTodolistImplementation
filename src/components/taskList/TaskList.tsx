@@ -55,6 +55,10 @@ const arePropsEqual = (
 ) => {
     const { filteredTasks: oldTasks, ...noTasksOld } = oldProps;
     const { filteredTasks: newTasks, ...noTasksNew } = newProps;
+    if (oldTasks.length !== newTasks.length) {
+        return false;
+    }
+
     for (const key in noTasksOld) {
         // dunno how to make types for this case tho
         if (!Object.is(noTasksOld[key], noTasksNew[key])) {
@@ -74,9 +78,6 @@ const arePropsEqual = (
     // It is probably better to move filtering tasks logic to the
     // TaskList component, and implement a check if
     // old tasks are the same as new tasks.
-    if (oldTasks.length !== newTasks.length) {
-        return false;
-    }
     for (const [
         { text: oldText, isDone: oldStatus },
         { text: newText, isDone: newStatus },
