@@ -8,6 +8,7 @@ import {
     ACTIVE_BUTTON_NAME,
     COMPLETED_BUTTON_NAME,
     FilterType,
+    TasksType,
 } from './components/taskList/TaskList';
 // should be injected:
 import { getUniqueStringId } from './utils/uniqueIdProvider';
@@ -36,10 +37,6 @@ export type TaskListType = {
 export const All_FILTER_VALUE = 'all';
 export const COMPLETED_FILTER_VALUE = 'completed';
 export const ACTIVE_FILTER_VALUE = 'active';
-
-export type TasksType = {
-    [key: string]: Array<TaskType>;
-};
 
 const taskList1Id = getUniqueStringId();
 const taskList2Id = getUniqueStringId();
@@ -188,7 +185,8 @@ function TaskApp() {
                 taskListId={taskListId}
                 key={taskListId}
                 title={title}
-                filteredTasks={filterTasks(tasks[taskListId], filter)}
+                filterTasksFn={filterTasks}
+                tasks={tasks}
                 getButtonIsActive={getButtonIsActive}
                 onRemoveTaskList={removeTaskList}
                 onAddTask={addTask}

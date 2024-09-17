@@ -4,7 +4,10 @@ import { Task } from './task/Task';
 import { EditableSpan } from '../EditableSpan';
 import s from './taskList.module.css';
 import { memo, useCallback } from 'react';
-import { zip } from '@/utils/zip';
+
+export type TasksType = {
+    [key: string]: Array<TaskType>;
+};
 
 export type FilterType = 'all' | 'active' | 'completed';
 
@@ -24,11 +27,15 @@ export type TaskType = {
 };
 
 type TaskListPropsType = {
+    filterTasksFn: (
+        tasks: Array<TaskType>,
+        filter: FilterType,
+    ) => Array<TaskType>;
+    tasks: TasksType;
     taskListId: string;
     filterValue: FilterType;
     title: string;
     onRemoveTaskList: (taskListId: string) => void;
-    filteredTasks: Array<TaskType>;
     onAddTask: (taskListId: string, taskTitle: string) => void;
     onRemoveTask: (taskListId: string, taskId: number) => void;
     onChangeTaskStatus: (
@@ -53,36 +60,25 @@ const arePropsEqual = (
     oldProps: TaskListPropsType,
     newProps: TaskListPropsType,
 ) => {
-    const { filteredTasks: oldTasks, ...noTasksOld } = oldProps;
-    const { filteredTasks: newTasks, ...noTasksNew } = newProps;
-    if (oldTasks.length !== newTasks.length) {
+    const {
+        tasks: { [oldProps.taskListId]: oldTasks },
+        ...oldRestProps
+    } = oldProps;
+
+    const {
+        tasks: { [oldProps.taskListId]: newTasks },
+        ...newRestProps
+    } = newProps;
+    // task list can be removed | task list can be added.
+    // If old and new task arrays are the same, it means that there is no
+    // new tasks or existing tasks weren't updated.
+    if (!(oldTasks && newTasks && oldTasks === newTasks)) {
         return false;
     }
 
-    for (const key in noTasksOld) {
+    for (const key in oldRestProps) {
         // dunno how to make types for this case tho
-        if (!Object.is(noTasksOld[key], noTasksNew[key])) {
-            return false;
-        }
-    }
-    // Because I filter tasks in the App, filteredTasks array
-    // will always be a new array, if the filter value is not 'all'.
-    // Because of that, merely changing a filter value will trigger a new
-    // re-render of all TaskList components.
-    // So here I check if the array length is the same as in the previous
-    // run (no new tasks) && filtered tasks in the array are the same
-    // as in the previous run (no modifications).
-    // If this is true, and everything else is the same, then I
-    // return true, so no new re-render of this component is needed.
-
-    // It is probably better to move filtering tasks logic to the
-    // TaskList component, and implement a check if
-    // old tasks are the same as new tasks.
-    for (const [
-        { text: oldText, isDone: oldStatus },
-        { text: newText, isDone: newStatus },
-    ] of zip(oldTasks, newTasks)) {
-        if (!(oldText === newText && oldStatus === newStatus)) {
+        if (!Object.is(oldRestProps[key], newRestProps[key])) {
             return false;
         }
     }
@@ -90,11 +86,12 @@ const arePropsEqual = (
 };
 
 export const TaskList = memo(function TaskList({
+    tasks,
+    filterTasksFn,
     taskListId,
     filterValue,
     title,
     onRemoveTaskList,
-    filteredTasks,
     onAddTask,
     onRemoveTask,
     onChangeTaskStatus,
@@ -103,6 +100,8 @@ export const TaskList = memo(function TaskList({
     getButtonIsActive,
     onSetFilterValue,
 }: TaskListPropsType) {
+    const filteredTasks = filterTasksFn(tasks[taskListId], filterValue);
+
     const handleAddTask = (taskText: string) => {
         onAddTask(taskListId, taskText);
     };

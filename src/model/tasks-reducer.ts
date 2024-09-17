@@ -1,4 +1,4 @@
-import { TasksType } from '@/App';
+import { TasksType } from '@/components/taskList/TaskList';
 import { taskItemGetter } from '@/utils/taskItemGetter';
 import { TaskType } from '@/components/taskList/TaskList';
 import {
