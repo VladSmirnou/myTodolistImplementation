@@ -3,7 +3,7 @@ import { InputTextSender } from '../InputTextSender';
 import { Task } from './task/Task';
 import { EditableSpan } from '../EditableSpan';
 import s from './taskList.module.css';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 
 export type TasksType = {
     [key: string]: Array<TaskType>;
@@ -31,7 +31,7 @@ type TaskListPropsType = {
         tasks: Array<TaskType>,
         filter: FilterType,
     ) => Array<TaskType>;
-    tasks: TasksType;
+    tasks: Array<TaskType>;
     taskListId: string;
     filterValue: FilterType;
     title: string;
@@ -56,35 +56,6 @@ type TaskListPropsType = {
     onSetFilterValue: (taskListId: string, buttonName: ButtonNameType) => void;
 };
 
-const arePropsEqual = (
-    oldProps: TaskListPropsType,
-    newProps: TaskListPropsType,
-) => {
-    const {
-        tasks: { [oldProps.taskListId]: oldTasks },
-        ...oldRestProps
-    } = oldProps;
-
-    const {
-        tasks: { [oldProps.taskListId]: newTasks },
-        ...newRestProps
-    } = newProps;
-    // task list can be removed | task list can be added.
-    // If old and new task arrays are the same, it means that there is no
-    // new tasks or existing tasks weren't updated.
-    if (!(oldTasks && newTasks && oldTasks === newTasks)) {
-        return false;
-    }
-
-    for (const key in oldRestProps) {
-        // dunno how to make types for this case tho
-        if (!Object.is(oldRestProps[key], newRestProps[key])) {
-            return false;
-        }
-    }
-    return true;
-};
-
 export const TaskList = memo(function TaskList({
     tasks,
     filterTasksFn,
@@ -100,11 +71,12 @@ export const TaskList = memo(function TaskList({
     getButtonIsActive,
     onSetFilterValue,
 }: TaskListPropsType) {
-    const filteredTasks = filterTasksFn(tasks[taskListId], filterValue);
-
-    const handleAddTask = (taskText: string) => {
-        onAddTask(taskListId, taskText);
-    };
+    const handleRemoveTask = useCallback(
+        (taskId: number) => {
+            onRemoveTask(taskListId, taskId);
+        },
+        [taskListId, onRemoveTask],
+    );
 
     const handleUpdateTaskText = useCallback(
         (taskId: number, newText: string) => {
@@ -120,41 +92,57 @@ export const TaskList = memo(function TaskList({
         [taskListId, onChangeTaskStatus],
     );
 
-    const handleRemoveTask = useCallback(
-        (taskId: number) => {
-            onRemoveTask(taskListId, taskId);
-        },
-        [taskListId, onRemoveTask],
+    const filteredTasks = useMemo(
+        () =>
+            filterTasksFn(tasks, filterValue).map((t) => (
+                <Task
+                    task={t}
+                    key={t.id}
+                    onRemoveTask={handleRemoveTask}
+                    onChangeTaskStatus={handleChangeTaskStatus}
+                    onUpdateTaskText={handleUpdateTaskText}
+                />
+            )),
+        [
+            tasks,
+            filterValue,
+            filterTasksFn,
+            handleChangeTaskStatus,
+            handleRemoveTask,
+            handleUpdateTaskText,
+        ],
     );
 
-    const handleUpdateTaskListTitle = (newTitle: string) => {
-        onUpdateTaskListTitle(taskListId, newTitle);
-    };
+    const handleAddTask = useCallback(
+        (taskText: string) => {
+            onAddTask(taskListId, taskText);
+        },
+        [taskListId, onAddTask],
+    );
 
-    const handleRemoveTaskList = () => {
+    const handleUpdateTaskListTitle = useCallback(
+        (newTitle: string) => {
+            onUpdateTaskListTitle(taskListId, newTitle);
+        },
+        [taskListId, onUpdateTaskListTitle],
+    );
+
+    const handleRemoveTaskList = useCallback(() => {
         onRemoveTaskList(taskListId);
-    };
+    }, [taskListId, onRemoveTaskList]);
 
-    const handleSetFilterValue = (buttonName: ButtonNameType) => {
-        onSetFilterValue(taskListId, buttonName);
-    };
-
-    const tasksOrNoTasksText =
-        filteredTasks.length ?
-            <ul>
-                {filteredTasks.map((t) => (
-                    <Task
-                        key={t.id}
-                        taskId={t.id}
-                        isDone={t.isDone}
-                        text={t.text}
-                        onRemoveTask={handleRemoveTask}
-                        onChangeTaskStatus={handleChangeTaskStatus}
-                        onUpdateTaskText={handleUpdateTaskText}
-                    />
-                ))}
-            </ul>
-        :   <p>thid tasklist doesnt have any tasks</p>;
+    const setAllFilterValue = useCallback(
+        () => onSetFilterValue(taskListId, ALL_BUTTON_NAME),
+        [taskListId, onSetFilterValue],
+    );
+    const setActiveFilterValue = useCallback(
+        () => onSetFilterValue(taskListId, ACTIVE_BUTTON_NAME),
+        [taskListId, onSetFilterValue],
+    );
+    const setCompletedFilterValue = useCallback(
+        () => onSetFilterValue(taskListId, COMPLETED_BUTTON_NAME),
+        [taskListId, onSetFilterValue],
+    );
 
     return (
         <div>
@@ -167,14 +155,16 @@ export const TaskList = memo(function TaskList({
                 <Button onClick={handleRemoveTaskList}>X</Button>
             </div>
             <InputTextSender callBack={handleAddTask} />
-            {tasksOrNoTasksText}
+            {filteredTasks.length ?
+                <ul>{filteredTasks}</ul>
+            :   <p>thid tasklist doesnt have any tasks</p>}
             <Button
                 className={
                     getButtonIsActive(ALL_BUTTON_NAME, filterValue) ?
                         s.active
                     :   ''
                 }
-                onClick={() => handleSetFilterValue(ALL_BUTTON_NAME)}
+                onClick={setAllFilterValue}
             >
                 {ALL_BUTTON_NAME}
             </Button>
@@ -184,7 +174,7 @@ export const TaskList = memo(function TaskList({
                         s.active
                     :   ''
                 }
-                onClick={() => handleSetFilterValue(ACTIVE_BUTTON_NAME)}
+                onClick={setActiveFilterValue}
             >
                 {ACTIVE_BUTTON_NAME}
             </Button>
@@ -194,10 +184,10 @@ export const TaskList = memo(function TaskList({
                         s.active
                     :   ''
                 }
-                onClick={() => handleSetFilterValue(COMPLETED_BUTTON_NAME)}
+                onClick={setCompletedFilterValue}
             >
                 {COMPLETED_BUTTON_NAME}
             </Button>
         </div>
     );
-}, arePropsEqual);
+});

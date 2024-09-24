@@ -186,7 +186,7 @@ function TaskApp() {
                 key={taskListId}
                 title={title}
                 filterTasksFn={filterTasks}
-                tasks={tasks}
+                tasks={tasks[taskListId]}
                 getButtonIsActive={getButtonIsActive}
                 onRemoveTaskList={removeTaskList}
                 onAddTask={addTask}

@@ -1,4 +1,4 @@
-import { ChangeEvent, KeyboardEvent, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, memo, useState } from 'react';
 import { Button } from './SuperButton';
 // should be injected
 import { cleanInputText } from '@/utils/inputTextCleaner';
@@ -24,7 +24,9 @@ const handleInputValue = (
     return;
 };
 
-export const InputTextSender = (props: InputTextSenderPropsType) => {
+export const InputTextSender = memo(function InputTextSender(
+    props: InputTextSenderPropsType,
+) {
     const [value, setValue] = useState<string>('');
     const [error, setError] = useState('');
 
@@ -56,4 +58,4 @@ export const InputTextSender = (props: InputTextSenderPropsType) => {
             <Button onClick={handleOnClick}>+</Button>
         </div>
     );
-};
+});
